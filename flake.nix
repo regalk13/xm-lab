@@ -37,11 +37,8 @@
 
           buildInputs = with pkgs; [
             jdk17
-
             androidSdk
-
             android-studio
-
             gradle
           ];
 
