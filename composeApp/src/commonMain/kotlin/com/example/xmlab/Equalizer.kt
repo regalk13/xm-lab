@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
 
-// --- Data Models ---
 data class ConsoleBand(
     val id: Int,
     val label: String,
@@ -36,15 +35,14 @@ data class ConsoleBand(
 )
 
 enum class EqPreset(val title: String, val gains: List<Float>) {
-    Flat("Flat", listOf(0f, 0f, 0f, 0f, 0f)),
-    BassBoost("Bass Boosted", listOf(8f, 5f, 0f, 0f, -2f)),
-    Vibrant("Vibrant", listOf(4f, -2f, -4f, 3f, 6f)),
-    Vocal("Voice / Spoken", listOf(-5f, -2f, 5f, 4f, -3f))
+    Flat("Flat", listOf(0f, 0f, 0f, 0f, 0f, 0f)),
+    BassBoost("Bass Boosted", listOf(8f, 5f, 0f, 0f, -2f, 5f)),
+    Vibrant("Vibrant", listOf(4f, -2f, -4f, 3f, 6f, 8f)),
+    Vocal("Voice / Spoken", listOf(-5f, -2f, 5f, 4f, -3f, 2f))
 }
 
 @Composable
 fun ConsoleEqualizerView() {
-    // State: Bands
     val bands = remember {
         mutableStateListOf(
             ConsoleBand(0, "400", 0f),
@@ -64,22 +62,27 @@ fun ConsoleEqualizerView() {
     val bgColor = Color(0xFF252535)
     val darkPanelColor = Color(0xFF1E1E2C)
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(3.dp, primaryColor, RectangleShape)
-            .background(bgColor)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        modifier = Modifier.
+        fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
+        Text(
+            text = "Equalizer",
+            color = primaryColor,
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            letterSpacing = 0.5.sp
+        )
+
         Box(
-            modifier = Modifier.padding(bottom = 24.dp),
             contentAlignment = Alignment.Center
         ) {
             Row(
                 modifier = Modifier
                     .background(darkPanelColor, RoundedCornerShape(8.dp))
-                    .border(1.dp, primaryColor.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                    .border(2.dp, primaryColor.copy(alpha = 0.5f), RectangleShape)
                     .clickable { showMenu = true }
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -91,7 +94,7 @@ fun ConsoleEqualizerView() {
                     fontSize = 16.sp,
                     letterSpacing = 1.sp
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                // Spacer(modifier = Modifier.width(8.dp))
             }
 
             DropdownMenu(
@@ -104,11 +107,13 @@ fun ConsoleEqualizerView() {
                         text = { Text(preset.title, color = Color.White) },
                         onClick = {
                             currentPresetName = preset.title
-                            // Apply Preset Gains
                             preset.gains.forEachIndexed { index, gain ->
                                 if (index < bands.size) {
                                     bands[index] = bands[index].copy(gain = gain)
                                 }
+                            }
+                            if (preset.gains.size > 5) {
+                                clearBass = preset.gains[5]
                             }
                             showMenu = false
                         }
@@ -117,6 +122,19 @@ fun ConsoleEqualizerView() {
             }
         }
 
+    }
+
+
+    Spacer(modifier = Modifier.height(15.dp))
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(3.dp, primaryColor, RectangleShape)
+            .background(bgColor)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -146,7 +164,7 @@ fun ConsoleEqualizerView() {
             letterSpacing = 2.sp,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(2.dp))
 
         ClearBassFader(
             value = clearBass,
@@ -209,7 +227,6 @@ fun VerticalFader(
                 val h = size.height
                 val centerX = w / 2
 
-                // Track
                 drawLine(
                     color = Color.Black.copy(alpha = 0.5f),
                     start = Offset(centerX, 0f),
@@ -357,7 +374,7 @@ fun ClearBassFader(
             val range = 20f
             val normalized = (value + 10f) / range
             val knobX = padding + (normalized * trackWidth)
-            val knobSize = 20.dp.toPx()
+            val knobSize = 24.dp.toPx()
 
             drawCircle(
                 color = Color.Black.copy(alpha = 0.5f),
