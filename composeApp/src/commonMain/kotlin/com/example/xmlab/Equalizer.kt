@@ -1,8 +1,13 @@
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,36 +19,50 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 
+// --- Data Models ---
 data class ConsoleBand(
     val id: Int,
     val label: String,
     var gain: Float
 )
 
+enum class EqPreset(val title: String, val gains: List<Float>) {
+    Flat("Flat", listOf(0f, 0f, 0f, 0f, 0f)),
+    BassBoost("Bass Boosted", listOf(8f, 5f, 0f, 0f, -2f)),
+    Vibrant("Vibrant", listOf(4f, -2f, -4f, 3f, 6f)),
+    Vocal("Voice / Spoken", listOf(-5f, -2f, 5f, 4f, -3f))
+}
+
 @Composable
 fun ConsoleEqualizerView() {
+    // State: Bands
     val bands = remember {
         mutableStateListOf(
-            ConsoleBand(0, "400", 2f),
-            ConsoleBand(1, "1k", 4f),
-            ConsoleBand(2, "2.5k", -1f),
-            ConsoleBand(3, "6.3k", 3f),
-            ConsoleBand(4, "16k", 5f)
+            ConsoleBand(0, "400", 0f),
+            ConsoleBand(1, "1k", 0f),
+            ConsoleBand(2, "2.5k", 0f),
+            ConsoleBand(3, "6.3k", 0f),
+            ConsoleBand(4, "16k", 0f)
         )
     }
 
-    var clearBass by remember {
-        mutableStateOf(0f)
-    }
+    var clearBass by remember { mutableStateOf(0f) }
+
+    var showMenu by remember { mutableStateOf(false) }
+    var currentPresetName by remember { mutableStateOf("Flat") }
 
     val primaryColor = Color(0xFFDCA561)
     val bgColor = Color(0xFF252535)
+    val darkPanelColor = Color(0xFF1E1E2C)
 
     Column(
         modifier = Modifier
@@ -53,16 +72,55 @@ fun ConsoleEqualizerView() {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        androidx.compose.material3.Text(
-            text = "EQ",
-            color = primaryColor,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 2.sp,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
+        Box(
+            modifier = Modifier.padding(bottom = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                modifier = Modifier
+                    .background(darkPanelColor, RoundedCornerShape(8.dp))
+                    .border(1.dp, primaryColor.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+                    .clickable { showMenu = true }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = currentPresetName,
+                    color = primaryColor,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    letterSpacing = 1.sp
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+                modifier = Modifier.background(darkPanelColor)
+            ) {
+                EqPreset.values().forEach { preset ->
+                    DropdownMenuItem(
+                        text = { Text(preset.title, color = Color.White) },
+                        onClick = {
+                            currentPresetName = preset.title
+                            // Apply Preset Gains
+                            preset.gains.forEachIndexed { index, gain ->
+                                if (index < bands.size) {
+                                    bands[index] = bands[index].copy(gain = gain)
+                                }
+                            }
+                            showMenu = false
+                        }
+                    )
+                }
+            }
+        }
 
         Row(
-            modifier = Modifier.fillMaxWidth().height(300.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -72,31 +130,35 @@ fun ConsoleEqualizerView() {
                     label = band.label,
                     color = primaryColor,
                     onValueChange = { newGain ->
+                        currentPresetName = "Custom"
                         bands[index] = bands[index].copy(gain = newGain)
                     }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Clear Bass",
+            text = "CLEAR BASS",
             color = Color.Gray,
             fontSize = 12.sp,
-            letterSpacing = 2.sp
+            letterSpacing = 2.sp,
+            fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(5.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         ClearBassFader(
             value = clearBass,
             color = primaryColor,
-            { clearBass = it }
+            onValueChange = { clearBass = it }
         )
-        Spacer(modifier = Modifier.height(30.dp))
 
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
+
+
 @Composable
 fun VerticalFader(
     gain: Float,
@@ -110,7 +172,6 @@ fun VerticalFader(
     val minGain = -15f
     val range = maxGain - minGain
 
-    // Visual sizing
     val knobHeight = 30.dp
     val knobWidth = 20.dp
 
@@ -133,14 +194,11 @@ fun VerticalFader(
                         },
                         onDrag = { change, dragAmount ->
                             change.consume()
-
                             dragAccumulatorY += dragAmount.y
 
                             val percentageMoved = dragAccumulatorY / size.height
                             val dbChange = percentageMoved * range * -1
-
                             val newValue = (startDragGain + dbChange).coerceIn(minGain, maxGain)
-
                             onValueChange(newValue)
                         }
                     )
@@ -151,13 +209,13 @@ fun VerticalFader(
                 val h = size.height
                 val centerX = w / 2
 
-
+                // Track
                 drawLine(
                     color = Color.Black.copy(alpha = 0.5f),
                     start = Offset(centerX, 0f),
                     end = Offset(centerX, h),
                     strokeWidth = 4.dp.toPx(),
-                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                    cap = StrokeCap.Round
                 )
 
                 val steps = 10
@@ -211,11 +269,11 @@ fun VerticalFader(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        androidx.compose.material3.Text(
+        Text(
             text = label,
             style = TextStyle(color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium)
         )
-        androidx.compose.material3.Text(
+        Text(
             text = "${gain.toInt()}dB",
             style = TextStyle(color = color, fontSize = 10.sp)
         )
@@ -228,6 +286,7 @@ fun ClearBassFader(
     color: Color,
     onValueChange: (Float) -> Unit
 ) {
+    val haptics = LocalHapticFeedback.current
     val currentValue by rememberUpdatedState(value)
 
     Box(
@@ -236,20 +295,30 @@ fun ClearBassFader(
             .height(60.dp)
             .pointerInput(Unit) {
                 var startVal = 0f
-                var drag = 0f
+                var dragAccumulator = 0f
+                var lastHapticValue = 0f
+
                 detectDragGestures(
                     onDragStart = {
                         startVal = currentValue
-                        drag = 0f
+                        dragAccumulator = 0f
+                        lastHapticValue = currentValue
                     },
                     onDrag = { change, dragAmount ->
                         change.consume()
-                        drag += dragAmount.x
+                        dragAccumulator += dragAmount.x
 
-                        val percentage = drag / size.width
-                        val changeVal = percentage * 20f
+                        val percentage = dragAccumulator / size.width
+                        val rawChange = percentage * 20f
 
-                        onValueChange((startVal + changeVal))
+                        val exactValue = startVal + rawChange
+                        val snappedValue = exactValue.roundToInt().toFloat().coerceIn(-10f, 10f)
+
+                        if (snappedValue != lastHapticValue) {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            lastHapticValue = snappedValue
+                            onValueChange(snappedValue)
+                        }
                     }
                 )
             }
@@ -258,37 +327,41 @@ fun ClearBassFader(
             val h = size.height
             val w = size.width
             val midY = h / 2
-            val range = 20f
+
+            val padding = 12.dp.toPx()
+            val trackWidth = w - (padding * 2)
 
             drawLine(
                 color = Color.Black.copy(alpha = 0.5f),
-                start = Offset(0f, midY),
-                end = Offset(w, midY),
+                start = Offset(padding, midY),
+                end = Offset(w - padding, midY),
                 strokeWidth = 4.dp.toPx(),
                 cap = StrokeCap.Round
             )
 
             val steps = 20
-
             for (i in 0..steps) {
-                val x = (i.toFloat() / steps) * w
-                val hSize = if (i == 10) 20f else 10f
+                val x = padding + (i.toFloat() / steps) * trackWidth
+                val isCenter = i == 10
+                val hSize = if (isCenter) 20f else 10f
+                val tickColor = if (isCenter) color.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.2f)
+
                 drawLine(
-                    color = if (i == 10) color.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.2f),
+                    color = tickColor,
                     start = Offset(x, midY - hSize/2),
                     end = Offset(x, midY + hSize/2),
                     strokeWidth = 2f
                 )
             }
 
+            val range = 20f
             val normalized = (value + 10f) / range
-            val knobX = normalized * w
-
-            val knobS = 20.dp.toPx()
+            val knobX = padding + (normalized * trackWidth)
+            val knobSize = 20.dp.toPx()
 
             drawCircle(
                 color = Color.Black.copy(alpha = 0.5f),
-                radius = knobS / 2,
+                radius = knobSize / 2,
                 center = Offset(knobX, midY + 4f)
             )
 
@@ -296,7 +369,13 @@ fun ClearBassFader(
                 brush = Brush.radialGradient(
                     colors = listOf(color, color.copy(alpha = 0.8f))
                 ),
-                radius = knobS / 2,
+                radius = knobSize / 2,
+                center = Offset(knobX, midY)
+            )
+
+            drawCircle(
+                color = Color.White,
+                radius = 3.dp.toPx(),
                 center = Offset(knobX, midY)
             )
         }
