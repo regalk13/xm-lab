@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 enum class AmbientMode(val title: String, val icon: ImageVector) {
-    NoiseCanceling("Noise Canceling", Icons.Default.Headset),
-    WindReduction("Wind Noise Reduction", Icons.Default.Air),
-    AmbientSound("Ambient Sound", Icons.Default.SurroundSound),
-    Off("Off", Icons.Default.PowerSettingsNew)
+  NoiseCanceling("Noise Canceling", Icons.Default.Headset),
+  WindReduction("Wind Noise Reduction", Icons.Default.Air),
+  AmbientSound("Ambient Sound", Icons.Default.SurroundSound),
+  Off("Off", Icons.Default.PowerSettingsNew)
 }
 
 @Composable
@@ -34,137 +34,118 @@ fun AmbientSoundControl(
     onFocusOnVoiceChange: (Boolean) -> Unit,
     primaryColor: Color
 ) {
-    val unselectedColor = Color.Gray.copy(alpha = 0.5f)
+  val unselectedColor = Color.Gray.copy(alpha = 0.5f)
 
-    val isAmbientActive = currentMode == AmbientMode.AmbientSound
+  val isAmbientActive = currentMode == AmbientMode.AmbientSound
 
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // Box(
-            //     modifier = Modifier
-            //        .fillMaxWidth(0.85f)
-            //        .height(2.dp)
-            //        .background(unselectedColor)
-            // )
+  Column(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
+        contentAlignment = Alignment.Center) {
+          // Box(
+          //     modifier = Modifier
+          //        .fillMaxWidth(0.85f)
+          //        .height(2.dp)
+          //        .background(unselectedColor)
+          // )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically) {
                 AmbientMode.values().forEach { mode ->
-                    AmbientModeButton(
-                        mode = mode,
-                        isSelected = currentMode == mode,
-                        primaryColor = primaryColor,
-                        unselectedColor = unselectedColor,
-                        onClick = { onModeSelected(mode) }
-                    )
+                  AmbientModeButton(
+                      mode = mode,
+                      isSelected = currentMode == mode,
+                      primaryColor = primaryColor,
+                      unselectedColor = unselectedColor,
+                      onClick = { onModeSelected(mode) })
                 }
-            }
+              }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(16.dp))
 
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
+    Column(
+        modifier =
+            Modifier.fillMaxWidth()
                 .alpha(if (isAmbientActive) 1f else 0.3f)
                 .background(Color(0xFF1E1E2C))
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Ambient Sound Level",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+                .padding(16.dp)) {
+          Text(
+              text = "Ambient Sound Level",
+              color = Color.White,
+              fontSize = 14.sp,
+              fontWeight = FontWeight.Bold,
+              modifier = Modifier.padding(bottom = 8.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.VolumeUp,
-                    contentDescription = null,
-                    tint = unselectedColor,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Filled.VolumeUp,
+                contentDescription = null,
+                tint = unselectedColor,
+                modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-                Slider(
-                    value = ambientLevel,
-                    onValueChange = onAmbientLevelChange,
-                    valueRange = 1f..20f,
-                    steps = 19,
-                    enabled = isAmbientActive,
-                    colors = SliderDefaults.colors(
+            Slider(
+                value = ambientLevel,
+                onValueChange = onAmbientLevelChange,
+                valueRange = 1f..20f,
+                steps = 19,
+                enabled = isAmbientActive,
+                colors =
+                    SliderDefaults.colors(
                         thumbColor = primaryColor,
                         activeTrackColor = primaryColor,
                         inactiveTrackColor = unselectedColor,
                         disabledThumbColor = primaryColor.copy(alpha = 0.5f),
-                        disabledActiveTrackColor = primaryColor.copy(alpha = 0.5f)
-                    ),
-                    modifier = Modifier.weight(1f)
-                )
+                        disabledActiveTrackColor = primaryColor.copy(alpha = 0.5f)),
+                modifier = Modifier.weight(1f))
 
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "${ambientLevel.toInt()}",
-                    color = primaryColor,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(20.dp)
-                )
-            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "${ambientLevel.toInt()}",
+                color = primaryColor,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.width(20.dp))
+          }
 
-            Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.RecordVoiceOver,
-                        contentDescription = null,
-                        tint = unselectedColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Focus on Voice",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                  Icon(
+                      imageVector = Icons.Default.RecordVoiceOver,
+                      contentDescription = null,
+                      tint = unselectedColor,
+                      modifier = Modifier.size(20.dp))
+                  Spacer(modifier = Modifier.width(12.dp))
+                  Text(
+                      text = "Focus on Voice",
+                      color = Color.White,
+                      fontSize = 14.sp,
+                      fontWeight = FontWeight.Medium)
                 }
 
                 Switch(
                     checked = focusOnVoice,
                     onCheckedChange = onFocusOnVoiceChange,
                     enabled = isAmbientActive,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = primaryColor,
-                        checkedTrackColor = primaryColor.copy(alpha = 0.5f),
-                        uncheckedThumbColor = Color.Gray,
-                        uncheckedTrackColor = Color.DarkGray,
-                        disabledCheckedThumbColor = primaryColor.copy(alpha = 0.5f),
-                        disabledCheckedTrackColor = primaryColor.copy(alpha = 0.2f)
-                    )
-                )
-            }
+                    colors =
+                        SwitchDefaults.colors(
+                            checkedThumbColor = primaryColor,
+                            checkedTrackColor = primaryColor.copy(alpha = 0.5f),
+                            uncheckedThumbColor = Color.Gray,
+                            uncheckedTrackColor = Color.DarkGray,
+                            disabledCheckedThumbColor = primaryColor.copy(alpha = 0.5f),
+                            disabledCheckedTrackColor = primaryColor.copy(alpha = 0.2f)))
+              }
         }
-    }
+  }
 }
 
 @Composable
@@ -175,40 +156,33 @@ fun AmbientModeButton(
     unselectedColor: Color,
     onClick: () -> Unit
 ) {
-    val circleColor = if (isSelected) primaryColor else Color(0xFF1E1E2C)
+  val circleColor = if (isSelected) primaryColor else Color(0xFF1E1E2C)
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(80.dp)
-            .clickable { onClick() }
-    ) {
+  Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier.width(80.dp).clickable { onClick() }) {
         Box(
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(circleColor)
-                .clickable { onClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            if (!isSelected) {
+            modifier =
+                Modifier.size(50.dp).clip(CircleShape).background(circleColor).clickable {
+                  onClick()
+                },
+            contentAlignment = Alignment.Center) {
+              if (!isSelected) {
                 Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(Color.Transparent)
-                        .padding(2.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFF252535))
-                )
-            }
+                    modifier =
+                        Modifier.matchParentSize()
+                            .background(Color.Transparent)
+                            .padding(2.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF252535)))
+              }
 
-            Icon(
-                imageVector = mode.icon,
-                contentDescription = mode.title,
-                tint = if (isSelected) Color.Black else unselectedColor,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+              Icon(
+                  imageVector = mode.icon,
+                  contentDescription = mode.title,
+                  tint = if (isSelected) Color.Black else unselectedColor,
+                  modifier = Modifier.size(24.dp))
+            }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -221,7 +195,6 @@ fun AmbientModeButton(
             lineHeight = 12.sp,
             minLines = 2,
             maxLines = 2,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
+            modifier = Modifier.fillMaxWidth())
+      }
 }

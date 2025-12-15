@@ -31,181 +31,161 @@ import kotlin.math.roundToInt
 
 @Composable
 fun ConsoleEqualizerView(bands: MutableList<ConsoleBand>) {
-    var clearBass by remember { mutableStateOf(0f) }
-    var showMenu by remember { mutableStateOf(false) }
-    var currentPresetName by remember { mutableStateOf("Flat") }
+  var clearBass by remember { mutableStateOf(0f) }
+  var showMenu by remember { mutableStateOf(false) }
+  var currentPresetName by remember { mutableStateOf("Flat") }
 
-    val primaryColor = Color(0xFFDCA561)
-    val bgColor = Color(0xFF252535)
-    val darkPanelColor = Color(0xFF1E1E2C)
+  val primaryColor = Color(0xFFDCA561)
+  val bgColor = Color(0xFF252535)
+  val darkPanelColor = Color(0xFF1E1E2C)
 
-    Column(
-        modifier = Modifier.padding(24.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "Equalizer",
-                color = primaryColor,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                letterSpacing = 0.5.sp
-            )
+  Column(modifier = Modifier.padding(24.dp)) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()) {
+          Text(
+              text = "Equalizer",
+              color = primaryColor,
+              fontWeight = FontWeight.Bold,
+              fontSize = 18.sp,
+              letterSpacing = 0.5.sp)
 
-            Box(contentAlignment = Alignment.Center) {
-                Row(
-                    modifier = Modifier
-                        .background(darkPanelColor, RoundedCornerShape(8.dp))
+          Box(contentAlignment = Alignment.Center) {
+            Row(
+                modifier =
+                    Modifier.background(darkPanelColor, RoundedCornerShape(8.dp))
                         .border(2.dp, primaryColor.copy(alpha = 0.5f), RectangleShape)
                         .clickable { showMenu = true }
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = currentPresetName,
-                        color = primaryColor,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        letterSpacing = 1.sp
-                    )
+                verticalAlignment = Alignment.CenterVertically) {
+                  Text(
+                      text = currentPresetName,
+                      color = primaryColor,
+                      fontWeight = FontWeight.Bold,
+                      fontSize = 16.sp,
+                      letterSpacing = 1.sp)
                 }
 
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    modifier = Modifier.background(darkPanelColor)
-                ) {
-                    EqPreset.values().forEach { preset ->
-                        DropdownMenuItem(
-                            text = { Text(preset.title, color = Color.White) },
-                            onClick = {
-                                currentPresetName = preset.title
-                                preset.gains.forEachIndexed { index, gain ->
-                                    if (index < bands.size) {
-                                        bands[index] = bands[index].copy(gain = gain)
-                                    }
-                                }
-                                if (preset.gains.size > 5) {
-                                    clearBass = preset.gains[5]
-                                }
-                                showMenu = false
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+                modifier = Modifier.background(darkPanelColor)) {
+                  EqPreset.values().forEach { preset ->
+                    DropdownMenuItem(
+                        text = { Text(preset.title, color = Color.White) },
+                        onClick = {
+                          currentPresetName = preset.title
+                          preset.gains.forEachIndexed { index, gain ->
+                            if (index < bands.size) {
+                              bands[index] = bands[index].copy(gain = gain)
                             }
-                        )
-                    }
+                          }
+                          if (preset.gains.size > 5) {
+                            clearBass = preset.gains[5]
+                          }
+                          showMenu = false
+                        })
+                  }
                 }
-            }
+          }
         }
 
-        Spacer(modifier = Modifier.height(15.dp))
+    Spacer(modifier = Modifier.height(15.dp))
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(3.dp, primaryColor, RectangleShape)
-                .background(bgColor),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+    Column(
+        modifier =
+            Modifier.fillMaxWidth().border(3.dp, primaryColor, RectangleShape).background(bgColor),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+          Row(
+              modifier = Modifier.fillMaxWidth().height(300.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically) {
                 bands.forEachIndexed { index, band ->
-                    VerticalFader(
-                        gain = band.gain,
-                        label = band.label,
-                        color = primaryColor,
-                        onValueChange = { newGain ->
-                            currentPresetName = "Custom"
-                            bands[index] = bands[index].copy(gain = newGain)
-                        }
-                    )
+                  VerticalFader(
+                      gain = band.gain,
+                      label = band.label,
+                      color = primaryColor,
+                      onValueChange = { newGain ->
+                        currentPresetName = "Custom"
+                        bands[index] = bands[index].copy(gain = newGain)
+                      })
                 }
-            }
+              }
 
-            Spacer(modifier = Modifier.height(24.dp))
+          Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "CLEAR BASS",
-                color = Color.Gray,
-                fontSize = 12.sp,
-                letterSpacing = 2.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(2.dp))
+          Text(
+              text = "CLEAR BASS",
+              color = Color.Gray,
+              fontSize = 12.sp,
+              letterSpacing = 2.sp,
+              fontWeight = FontWeight.Bold)
+          Spacer(modifier = Modifier.height(2.dp))
 
-            ClearBassFader(
-                value = clearBass,
-                color = primaryColor,
-                onValueChange = { clearBass = it }
-            )
+          ClearBassFader(
+              value = clearBass, color = primaryColor, onValueChange = { clearBass = it })
 
-            Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(16.dp))
         }
-    }
-
+  }
 }
 
 @Composable
-fun VerticalFader(
-    gain: Float,
-    label: String,
-    color: Color,
-    onValueChange: (Float) -> Unit
-) {
-    val currentGain by rememberUpdatedState(gain)
-    val maxGain = 15f
-    val minGain = -15f
-    val range = maxGain - minGain
-    val knobHeight = 30.dp
-    val knobWidth = 20.dp
+fun VerticalFader(gain: Float, label: String, color: Color, onValueChange: (Float) -> Unit) {
+  val currentGain by rememberUpdatedState(gain)
+  val maxGain = 15f
+  val minGain = -15f
+  val range = maxGain - minGain
+  val knobHeight = 30.dp
+  val knobWidth = 20.dp
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(50.dp).fillMaxHeight()
-    ) {
+  Column(
+      horizontalAlignment = Alignment.CenterHorizontally,
+      modifier = Modifier.width(50.dp).fillMaxHeight()) {
         Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .pointerInput(Unit) {
-                    var startDragGain = 0f
-                    var dragAccumulatorY = 0f
-                    detectDragGestures(
-                        onDragStart = {
-                            startDragGain = currentGain
-                            dragAccumulatorY = 0f
-                        },
-                        onDrag = { change, dragAmount ->
-                            change.consume()
-                            dragAccumulatorY += dragAmount.y
-                            val percentageMoved = dragAccumulatorY / size.height
-                            val dbChange = percentageMoved * range * -1
-                            val newValue = (startDragGain + dbChange).coerceIn(minGain, maxGain)
-                            onValueChange(newValue)
-                        }
-                    )
-                }
-        ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
+            modifier =
+                Modifier.weight(1f).fillMaxWidth().pointerInput(Unit) {
+                  var startDragGain = 0f
+                  var dragAccumulatorY = 0f
+                  detectDragGestures(
+                      onDragStart = {
+                        startDragGain = currentGain
+                        dragAccumulatorY = 0f
+                      },
+                      onDrag = { change, dragAmount ->
+                        change.consume()
+                        dragAccumulatorY += dragAmount.y
+                        val percentageMoved = dragAccumulatorY / size.height
+                        val dbChange = percentageMoved * range * -1
+                        val newValue = (startDragGain + dbChange).coerceIn(minGain, maxGain)
+                        onValueChange(newValue)
+                      })
+                }) {
+              Canvas(modifier = Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
                 val centerX = w / 2
 
-                drawLine(color = Color.Black.copy(alpha = 0.5f), start = Offset(centerX, 0f), end = Offset(centerX, h), strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round)
+                drawLine(
+                    color = Color.Black.copy(alpha = 0.5f),
+                    start = Offset(centerX, 0f),
+                    end = Offset(centerX, h),
+                    strokeWidth = 4.dp.toPx(),
+                    cap = StrokeCap.Round)
 
                 val steps = 10
                 for (i in 0..steps) {
-                    val y = (i.toFloat() / steps) * h
-                    val isZero = i == 5
-                    val lineColor = if (isZero) color.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.1f)
-                    val lineWidth = if (isZero) 20f else 10f
-                    drawLine(color = lineColor, start = Offset(centerX - (lineWidth/2), y), end = Offset(centerX + (lineWidth/2), y), strokeWidth = 2f)
+                  val y = (i.toFloat() / steps) * h
+                  val isZero = i == 5
+                  val lineColor =
+                      if (isZero) color.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.1f)
+                  val lineWidth = if (isZero) 20f else 10f
+                  drawLine(
+                      color = lineColor,
+                      start = Offset(centerX - (lineWidth / 2), y),
+                      end = Offset(centerX + (lineWidth / 2), y),
+                      strokeWidth = 2f)
                 }
 
                 val normalizedGain = 1f - ((gain - minGain) / range)
@@ -213,67 +193,103 @@ fun VerticalFader(
                 val capWidthPx = knobWidth.toPx()
                 val capHeightPx = knobHeight.toPx()
 
-                drawRoundRect(color = Color.Black.copy(alpha = 0.6f), topLeft = Offset(centerX - capWidthPx/2, capYCenter - capHeightPx/2 + 5f), size = Size(capWidthPx, capHeightPx), cornerRadius = CornerRadius(4.dp.toPx()))
-                drawRoundRect(brush = Brush.horizontalGradient(colors = listOf(color.copy(alpha = 0.8f), color, color.copy(alpha = 0.8f))), topLeft = Offset(centerX - capWidthPx/2, capYCenter - capHeightPx/2), size = Size(capWidthPx, capHeightPx), cornerRadius = CornerRadius(4.dp.toPx()))
-                drawLine(color = Color.White.copy(alpha = 0.8f), start = Offset(centerX - capWidthPx/2 + 4f, capYCenter), end = Offset(centerX + capWidthPx/2 - 4f, capYCenter), strokeWidth = 2f)
+                drawRoundRect(
+                    color = Color.Black.copy(alpha = 0.6f),
+                    topLeft = Offset(centerX - capWidthPx / 2, capYCenter - capHeightPx / 2 + 5f),
+                    size = Size(capWidthPx, capHeightPx),
+                    cornerRadius = CornerRadius(4.dp.toPx()))
+                drawRoundRect(
+                    brush =
+                        Brush.horizontalGradient(
+                            colors =
+                                listOf(color.copy(alpha = 0.8f), color, color.copy(alpha = 0.8f))),
+                    topLeft = Offset(centerX - capWidthPx / 2, capYCenter - capHeightPx / 2),
+                    size = Size(capWidthPx, capHeightPx),
+                    cornerRadius = CornerRadius(4.dp.toPx()))
+                drawLine(
+                    color = Color.White.copy(alpha = 0.8f),
+                    start = Offset(centerX - capWidthPx / 2 + 4f, capYCenter),
+                    end = Offset(centerX + capWidthPx / 2 - 4f, capYCenter),
+                    strokeWidth = 2f)
+              }
             }
-        }
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = label, style = TextStyle(color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium))
+        Text(
+            text = label,
+            style = TextStyle(color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Medium))
         Text(text = "${gain.toInt()}dB", style = TextStyle(color = color, fontSize = 10.sp))
-    }
+      }
 }
 
 @Composable
 fun ClearBassFader(value: Float, color: Color, onValueChange: (Float) -> Unit) {
-    val haptics = LocalHapticFeedback.current
-    val currentValue by rememberUpdatedState(value)
+  val haptics = LocalHapticFeedback.current
+  val currentValue by rememberUpdatedState(value)
 
-    Box(
-        modifier = Modifier.fillMaxWidth().height(60.dp).pointerInput(Unit) {
+  Box(
+      modifier =
+          Modifier.fillMaxWidth().height(60.dp).pointerInput(Unit) {
             var startVal = 0f
             var dragAccumulator = 0f
             var lastHapticValue = 0f
             detectDragGestures(
-                onDragStart = { startVal = currentValue; dragAccumulator = 0f; lastHapticValue = currentValue },
+                onDragStart = {
+                  startVal = currentValue
+                  dragAccumulator = 0f
+                  lastHapticValue = currentValue
+                },
                 onDrag = { change, dragAmount ->
-                    change.consume()
-                    dragAccumulator += dragAmount.x
-                    val percentage = dragAccumulator / size.width
-                    val rawChange = percentage * 20f
-                    val exactValue = startVal + rawChange
-                    val snappedValue = exactValue.roundToInt().toFloat().coerceIn(-10f, 10f)
-                    if (snappedValue != lastHapticValue) {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        lastHapticValue = snappedValue
-                        onValueChange(snappedValue)
-                    }
-                }
-            )
-        }
-    ) {
+                  change.consume()
+                  dragAccumulator += dragAmount.x
+                  val percentage = dragAccumulator / size.width
+                  val rawChange = percentage * 20f
+                  val exactValue = startVal + rawChange
+                  val snappedValue = exactValue.roundToInt().toFloat().coerceIn(-10f, 10f)
+                  if (snappedValue != lastHapticValue) {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    lastHapticValue = snappedValue
+                    onValueChange(snappedValue)
+                  }
+                })
+          }) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val h = size.height
-            val w = size.width
-            val midY = h / 2
-            val padding = 12.dp.toPx()
-            val trackWidth = w - (padding * 2)
+          val h = size.height
+          val w = size.width
+          val midY = h / 2
+          val padding = 12.dp.toPx()
+          val trackWidth = w - (padding * 2)
 
-            drawLine(color = Color.Black.copy(alpha = 0.5f), start = Offset(padding, midY), end = Offset(w - padding, midY), strokeWidth = 4.dp.toPx(), cap = StrokeCap.Round)
-            for (i in 0..20) {
-                val x = padding + (i.toFloat() / 20) * trackWidth
-                val isCenter = i == 10
-                val tickColor = if (isCenter) color.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.2f)
-                val hSize = if (isCenter) 20f else 10f
-                drawLine(color = tickColor, start = Offset(x, midY - hSize/2), end = Offset(x, midY + hSize/2), strokeWidth = 2f)
-            }
-            val normalized = (value + 10f) / 20f
-            val knobX = padding + (normalized * trackWidth)
-            val knobSize = 24.dp.toPx()
+          drawLine(
+              color = Color.Black.copy(alpha = 0.5f),
+              start = Offset(padding, midY),
+              end = Offset(w - padding, midY),
+              strokeWidth = 4.dp.toPx(),
+              cap = StrokeCap.Round)
+          for (i in 0..20) {
+            val x = padding + (i.toFloat() / 20) * trackWidth
+            val isCenter = i == 10
+            val tickColor =
+                if (isCenter) color.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.2f)
+            val hSize = if (isCenter) 20f else 10f
+            drawLine(
+                color = tickColor,
+                start = Offset(x, midY - hSize / 2),
+                end = Offset(x, midY + hSize / 2),
+                strokeWidth = 2f)
+          }
+          val normalized = (value + 10f) / 20f
+          val knobX = padding + (normalized * trackWidth)
+          val knobSize = 24.dp.toPx()
 
-            drawCircle(color = Color.Black.copy(alpha = 0.5f), radius = knobSize / 2, center = Offset(knobX, midY + 4f))
-            drawCircle(brush = Brush.radialGradient(colors = listOf(color, color.copy(alpha = 0.8f))), radius = knobSize / 2, center = Offset(knobX, midY))
-            drawCircle(color = Color.White, radius = 3.dp.toPx(), center = Offset(knobX, midY))
+          drawCircle(
+              color = Color.Black.copy(alpha = 0.5f),
+              radius = knobSize / 2,
+              center = Offset(knobX, midY + 4f))
+          drawCircle(
+              brush = Brush.radialGradient(colors = listOf(color, color.copy(alpha = 0.8f))),
+              radius = knobSize / 2,
+              center = Offset(knobX, midY))
+          drawCircle(color = Color.White, radius = 3.dp.toPx(), center = Offset(knobX, midY))
         }
-    }
+      }
 }
