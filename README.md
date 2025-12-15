@@ -1,10 +1,30 @@
-# XM LAB
+# XM Lab
 
-KMP application to lab test and replace features of gadget apps with a focus on headphones like the Sony headphone app.
+A KMP application designed to experiment with and replace companion app features for gadgets with a focus on headphones. Like the Sony Headphones app.
 
-## TODO
+## Development Environment 
 
-## Support 
+###  Nix (Recommended)
 
-- TODO: Implement logic from gadgetbridge
+This project uses **Nix** to manage all development dependencies, ensuring a reproducible environment across machines (NixOS or Linux, WSL, MacOS (Nix darwin)).
 
+#### Setup
+To enter the development shell with all required tools (JDK, android-sdk, android-studio, gradle):
+
+```bash
+nix develop
+```
+
+#### Formatting
+
+You can format the entire codebase (Kotlin and Nix files) using the configured formatter:
+
+```bash
+nix fmt
+```
+
+or if you are already inside the shell:
+
+```Bash
+treefmt
+```
