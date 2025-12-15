@@ -28,3 +28,8 @@ or if you are already inside the shell:
 ```Bash
 treefmt
 ```
+## TODO
+
+- [ ] `nix build` using gradle and live preview with (waydroid and/or emulator)
+- [ ] Check iOS version
+- [ ] Implement multiple devices (hopefully al Sony WH)
