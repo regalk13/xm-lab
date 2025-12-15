@@ -44,15 +44,15 @@ fun AmbientSoundControl(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .height(2.dp)
-                    .background(unselectedColor)
-            )
+            // Box(
+            //     modifier = Modifier
+            //        .fillMaxWidth(0.85f)
+            //        .height(2.dp)
+            //        .background(unselectedColor)
+            // )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
